@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/stok-takip/sw.js', { scope: '/stok-takip/' })})}
