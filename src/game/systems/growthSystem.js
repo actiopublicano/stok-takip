@@ -44,6 +44,7 @@ export const buyumeMiktariHesapla = ({
   gubreTipi,
   havaDurumu,
   mevsim,
+  olayBonusu = 1.0,
 }) => {
   if (gecenZaman <= 0 || buyumeZamani <= 0) return 0;
 
@@ -62,6 +63,9 @@ export const buyumeMiktariHesapla = ({
 
   // Mevsim etkisi
   carpan *= MEVSIM_CARPANI[mevsim] ?? 1.0;
+
+  // Arı/olay büyüme bonusu
+  carpan *= olayBonusu;
 
   return (gecenZaman / buyumeZamani) * 100 * carpan;
 };
@@ -110,7 +114,7 @@ export const hastalikZarariHesapla = (hastalik, gecenZaman) => {
 };
 
 // Tek saksıyı verilen süre için güncelle
-export const saksiGuncelle = (saksi, gecenZaman, havaDurumu, mevsim) => {
+export const saksiGuncelle = (saksi, gecenZaman, havaDurumu, mevsim, olayBonusu = 1.0) => {
   if (saksi.asama === ASAMA.BOS || saksi.asama === ASAMA.OLDU) return saksi;
 
   const cicek = cicekBul(saksi.cicekId);
@@ -136,6 +140,7 @@ export const saksiGuncelle = (saksi, gecenZaman, havaDurumu, mevsim) => {
     gubreTipi: gubreAktif,
     havaDurumu,
     mevsim,
+    olayBonusu,
   });
 
   // Hastalık zararı

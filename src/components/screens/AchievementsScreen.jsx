@@ -16,6 +16,11 @@ const KATEGORI_IKON = {
   süre: '📅',
 };
 
+const formatSayi = (n) => {
+  if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'B';
+  return String(n);
+};
+
 export default function AchievementsScreen() {
   const { durum } = useOyun();
   const { basarimlar, istatistikler, koleksiyon } = durum;
@@ -23,7 +28,6 @@ export default function AchievementsScreen() {
   const acikSayisi = Object.keys(basarimlar).length;
   const toplamSayi = BASARIMLAR.length;
 
-  // Kategoriye göre grupla
   const kategoriler = {};
   for (const b of BASARIMLAR) {
     if (!kategoriler[b.kategori]) kategoriler[b.kategori] = [];
@@ -37,7 +41,6 @@ export default function AchievementsScreen() {
         <span className="basarim-sayac">{acikSayisi}/{toplamSayi}</span>
       </div>
 
-      {/* İlerleme */}
       <div className="basarim-ilerleme-bg">
         <div
           className="basarim-ilerleme-dolu"
@@ -46,7 +49,6 @@ export default function AchievementsScreen() {
       </div>
       <div className="basarim-yuzde">{Math.round((acikSayisi / toplamSayi) * 100)}% tamamlandı</div>
 
-      {/* Kategoriler */}
       {Object.entries(kategoriler).map(([kat, liste]) => (
         <div key={kat} className="basarim-kategori">
           <div className="basarim-kat-baslik">
@@ -55,7 +57,9 @@ export default function AchievementsScreen() {
           <div className="basarim-liste">
             {liste.map(b => {
               const acik = !!basarimlar[b.id];
-              const ilerleme = acik ? 100 : 0; // TODO: gerçek ilerleme
+              const prog = b.ilerleme ? b.ilerleme(istatistikler, koleksiyon) : null;
+              const yuzde = prog ? Math.round((prog.mevcut / prog.hedef) * 100) : (acik ? 100 : 0);
+
               return (
                 <div
                   key={b.id}
@@ -63,17 +67,29 @@ export default function AchievementsScreen() {
                 >
                   <span className="basarim-emoji">{acik ? b.emoji : '🔒'}</span>
                   <div className="basarim-bilgi">
-                    <div className="basarim-ad">{acik ? b.ad : '???'}</div>
-                    <div className="basarim-aciklama">
-                      {acik ? b.aciklama : 'Henüz açılmadı'}
-                    </div>
+                    <div className="basarim-ad">{acik ? b.ad : b.ad}</div>
+                    <div className="basarim-aciklama">{b.aciklama}</div>
+
+                    {/* İlerleme çubuğu */}
+                    {!acik && prog && (
+                      <div className="basarim-prog-kap">
+                        <div className="basarim-prog-bg">
+                          <div
+                            className="basarim-prog-dolu"
+                            style={{ width: `${yuzde}%` }}
+                          />
+                        </div>
+                        <span className="basarim-prog-yazi">
+                          {formatSayi(prog.mevcut)}/{formatSayi(prog.hedef)}
+                        </span>
+                      </div>
+                    )}
+
                     {acik && (
                       <div className="basarim-odul">+{b.odul} 💰</div>
                     )}
                   </div>
-                  {acik && (
-                    <span className="basarim-tik">✅</span>
-                  )}
+                  {acik && <span className="basarim-tik">✅</span>}
                 </div>
               );
             })}

@@ -113,6 +113,8 @@ export const baslangicDurumu = {
     modalTipi: null,
     indirimAktif: false,
     indirimCarpani: 1.0,
+    indirimBitiZamani: null,
+    ariBonusBitis: null,
   },
 
   // Meta bilgi

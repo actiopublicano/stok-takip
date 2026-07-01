@@ -1465,3 +1465,92 @@ body {
   color: #a5d6a7;
   font-weight: 600;
 }
+
+/* ─── OLAY BONUS CHİPLERİ ──────────────────────────────────────── */
+.sera-olay-indirim {
+  background: linear-gradient(135deg, #f57f17, #e65100) !important;
+}
+
+.sera-olay-ari {
+  background: linear-gradient(135deg, #f9a825, #f57f17) !important;
+}
+
+/* ─── SAKSI KALİTE YILDIZI ─────────────────────────────────────── */
+.saksi-kalite-yildiz {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-size: 11px;
+  line-height: 1;
+  z-index: 1;
+}
+
+/* ─── BAŞARIM PROGRESS ─────────────────────────────────────────── */
+.basarim-prog-kap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.basarim-prog-bg {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.basarim-prog-dolu {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.basarim-prog-yazi {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ─── KOLEKSİYON DETAY MODAL ───────────────────────────────────── */
+.kol-detay-modal {
+  max-height: 80vh;
+}
+
+.kol-detay-icerik {
+  padding: 12px !important;
+}
+
+.kol-detay-aciklama {
+  text-align: center;
+  color: #616161;
+  font-size: 13px;
+  font-style: italic;
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.kol-detay-mevsimler {
+  margin-top: 8px;
+}
+
+.kol-detay-mevsim-liste {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.kol-detay-mevsim-chip {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}

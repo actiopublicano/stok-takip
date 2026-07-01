@@ -7,12 +7,25 @@ import QuickActions from '../ui/QuickActions.jsx';
 import { HAVA_IKONU, MEVSIM_IKONU } from '../../game/systems/weatherSystem.js';
 import { ASAMA } from '../../game/core/constants.js';
 
+const kalanSureYaz = (bitiZamani) => {
+  if (!bitiZamani) return '';
+  const kalan = bitiZamani - Date.now();
+  if (kalan <= 0) return '';
+  const dk = Math.ceil(kalan / 60000);
+  if (dk >= 60) return `${Math.floor(dk / 60)}s ${dk % 60}dk`;
+  return `${dk}dk`;
+};
+
 export default function GreenhouseScreen() {
   const { durum } = useOyun();
-  const { saksilar, hava, mevsim, aktifOlaylar } = durum;
+  const { saksilar, hava, mevsim, aktifOlaylar, ui } = durum;
 
   const dolu = saksilar.filter(s => s.asama !== ASAMA.BOS).length;
   const kapasit = saksilar.length;
+
+  const indirimKalan = ui.indirimAktif ? kalanSureYaz(ui.indirimBitiZamani) : null;
+  const ariKalan = ui.ariBonusBitis && Date.now() < ui.ariBonusBitis ? kalanSureYaz(ui.ariBonusBitis) : null;
+  const bonusAktif = indirimKalan || ariKalan;
 
   return (
     <div className="sera-ekrani">
@@ -24,7 +37,23 @@ export default function GreenhouseScreen() {
         <span className="sera-kapasite">🪴 {dolu}/{kapasit}</span>
       </div>
 
-      {/* Aktif olaylar */}
+      {/* Aktif bonus efektler */}
+      {bonusAktif && (
+        <div className="sera-olaylar">
+          {indirimKalan && (
+            <div className="sera-olay-chip sera-olay-indirim">
+              🏷️ %30 İndirim {indirimKalan && `(${indirimKalan})`}
+            </div>
+          )}
+          {ariKalan && (
+            <div className="sera-olay-chip sera-olay-ari">
+              🐝 Büyüme +30% {ariKalan && `(${ariKalan})`}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Geçmiş olaylar */}
       {aktifOlaylar.length > 0 && (
         <div className="sera-olaylar">
           {aktifOlaylar.slice(-2).map(olay => (

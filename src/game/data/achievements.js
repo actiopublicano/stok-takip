@@ -1,5 +1,7 @@
 // Başarım tanımları
 
+const il = (fn, hedef) => (stats, kol) => ({ mevcut: Math.min(hedef, fn(stats, kol)), hedef });
+
 export const BASARIMLAR = [
   // ─── İlk Adımlar ─────────────────────────────────────────────
   {
@@ -10,6 +12,7 @@ export const BASARIMLAR = [
     kategori: 'başlangıç',
     odul: 20,
     kontrol: (stats) => stats.toplamEkim >= 1,
+    ilerleme: il((s) => s.toplamEkim, 1),
   },
   {
     id: 'ilk_satis',
@@ -19,6 +22,7 @@ export const BASARIMLAR = [
     kategori: 'başlangıç',
     odul: 30,
     kontrol: (stats) => stats.toplamSatis >= 1,
+    ilerleme: il((s) => s.toplamSatis, 1),
   },
   {
     id: 'ilk_sulama',
@@ -28,6 +32,7 @@ export const BASARIMLAR = [
     kategori: 'başlangıç',
     odul: 15,
     kontrol: (stats) => stats.toplamSulama >= 10,
+    ilerleme: il((s) => s.toplamSulama, 10),
   },
   {
     id: 'ilk_gubre',
@@ -37,6 +42,7 @@ export const BASARIMLAR = [
     kategori: 'başlangıç',
     odul: 25,
     kontrol: (stats) => stats.toplamGubre >= 1,
+    ilerleme: il((s) => s.toplamGubre, 1),
   },
   // ─── Yetiştirme ──────────────────────────────────────────────
   {
@@ -47,6 +53,7 @@ export const BASARIMLAR = [
     kategori: 'yetiştirme',
     odul: 50,
     kontrol: (stats) => stats.toplamYetistirme >= 10,
+    ilerleme: il((s) => s.toplamYetistirme, 10),
   },
   {
     id: 'cicek_50',
@@ -56,6 +63,7 @@ export const BASARIMLAR = [
     kategori: 'yetiştirme',
     odul: 150,
     kontrol: (stats) => stats.toplamYetistirme >= 50,
+    ilerleme: il((s) => s.toplamYetistirme, 50),
   },
   {
     id: 'cicek_100',
@@ -65,6 +73,7 @@ export const BASARIMLAR = [
     kategori: 'yetiştirme',
     odul: 400,
     kontrol: (stats) => stats.toplamYetistirme >= 100,
+    ilerleme: il((s) => s.toplamYetistirme, 100),
   },
   {
     id: 'cicek_500',
@@ -74,6 +83,7 @@ export const BASARIMLAR = [
     kategori: 'yetiştirme',
     odul: 2000,
     kontrol: (stats) => stats.toplamYetistirme >= 500,
+    ilerleme: il((s) => s.toplamYetistirme, 500),
   },
   // ─── Sulama ──────────────────────────────────────────────────
   {
@@ -84,6 +94,7 @@ export const BASARIMLAR = [
     kategori: 'sulama',
     odul: 30,
     kontrol: (stats) => stats.toplamSulama >= 100,
+    ilerleme: il((s) => s.toplamSulama, 100),
   },
   {
     id: 'sulama_1000',
@@ -93,6 +104,7 @@ export const BASARIMLAR = [
     kategori: 'sulama',
     odul: 200,
     kontrol: (stats) => stats.toplamSulama >= 1000,
+    ilerleme: il((s) => s.toplamSulama, 1000),
   },
   // ─── Ekonomi ─────────────────────────────────────────────────
   {
@@ -103,6 +115,7 @@ export const BASARIMLAR = [
     kategori: 'ekonomi',
     odul: 100,
     kontrol: (stats) => stats.toplamKazanc >= 1000,
+    ilerleme: il((s) => s.toplamKazanc, 1000),
   },
   {
     id: 'kazanc_10000',
@@ -112,6 +125,7 @@ export const BASARIMLAR = [
     kategori: 'ekonomi',
     odul: 500,
     kontrol: (stats) => stats.toplamKazanc >= 10000,
+    ilerleme: il((s) => s.toplamKazanc, 10000),
   },
   {
     id: 'kazanc_100000',
@@ -121,6 +135,7 @@ export const BASARIMLAR = [
     kategori: 'ekonomi',
     odul: 3000,
     kontrol: (stats) => stats.toplamKazanc >= 100000,
+    ilerleme: il((s) => s.toplamKazanc, 100000),
   },
   // ─── Koleksiyon ──────────────────────────────────────────────
   {
@@ -131,6 +146,7 @@ export const BASARIMLAR = [
     kategori: 'koleksiyon',
     odul: 80,
     kontrol: (stats, koleksiyon) => Object.keys(koleksiyon).length >= 10,
+    ilerleme: il((s, k) => Object.keys(k).length, 10),
   },
   {
     id: 'koleksiyon_30',
@@ -140,6 +156,7 @@ export const BASARIMLAR = [
     kategori: 'koleksiyon',
     odul: 300,
     kontrol: (stats, koleksiyon) => Object.keys(koleksiyon).length >= 30,
+    ilerleme: il((s, k) => Object.keys(k).length, 30),
   },
   {
     id: 'koleksiyon_50',
@@ -149,6 +166,7 @@ export const BASARIMLAR = [
     kategori: 'koleksiyon',
     odul: 800,
     kontrol: (stats, koleksiyon) => Object.keys(koleksiyon).length >= 50,
+    ilerleme: il((s, k) => Object.keys(k).length, 50),
   },
   // ─── Sera ────────────────────────────────────────────────────
   {
@@ -159,6 +177,7 @@ export const BASARIMLAR = [
     kategori: 'sera',
     odul: 100,
     kontrol: (stats) => stats.seraLevel >= 2,
+    ilerleme: il((s) => s.seraLevel, 2),
   },
   {
     id: 'buyuk_sera_al',
@@ -168,6 +187,7 @@ export const BASARIMLAR = [
     kategori: 'sera',
     odul: 300,
     kontrol: (stats) => stats.seraLevel >= 3,
+    ilerleme: il((s) => s.seraLevel, 3),
   },
   {
     id: 'premium_sera_al',
@@ -177,6 +197,7 @@ export const BASARIMLAR = [
     kategori: 'sera',
     odul: 1000,
     kontrol: (stats) => stats.seraLevel >= 5,
+    ilerleme: il((s) => s.seraLevel, 5),
   },
   // ─── Çiçek Ölümü ─────────────────────────────────────────────
   {
@@ -187,6 +208,7 @@ export const BASARIMLAR = [
     kategori: 'bakım',
     odul: 200,
     kontrol: (stats) => stats.ardisikCanlıGun >= 7,
+    ilerleme: il((s) => s.ardisikCanlıGun, 7),
   },
   {
     id: 'canli_tut_30',
@@ -196,6 +218,7 @@ export const BASARIMLAR = [
     kategori: 'bakım',
     odul: 1000,
     kontrol: (stats) => stats.ardisikCanlıGun >= 30,
+    ilerleme: il((s) => s.ardisikCanlıGun, 30),
   },
   // ─── Özel ────────────────────────────────────────────────────
   {
@@ -206,6 +229,7 @@ export const BASARIMLAR = [
     kategori: 'özel',
     odul: 150,
     kontrol: (stats) => stats.nadirYetistirme >= 1,
+    ilerleme: il((s) => s.nadirYetistirme, 1),
   },
   {
     id: 'egzotik_cick',
@@ -215,6 +239,7 @@ export const BASARIMLAR = [
     kategori: 'özel',
     odul: 400,
     kontrol: (stats) => stats.egzotikYetistirme >= 1,
+    ilerleme: il((s) => s.egzotikYetistirme, 1),
   },
   {
     id: 'efsanevi_cick',
@@ -224,6 +249,7 @@ export const BASARIMLAR = [
     kategori: 'özel',
     odul: 2000,
     kontrol: (stats) => stats.efsaneviYetistirme >= 1,
+    ilerleme: il((s) => s.efsaneviYetistirme, 1),
   },
   {
     id: 'hastalik_iyilest',
@@ -233,6 +259,7 @@ export const BASARIMLAR = [
     kategori: 'özel',
     odul: 100,
     kontrol: (stats) => stats.toplamIyilestirme >= 10,
+    ilerleme: il((s) => s.toplamIyilestirme, 10),
   },
   // ─── Günlük ──────────────────────────────────────────────────
   {
@@ -243,6 +270,7 @@ export const BASARIMLAR = [
     kategori: 'günlük',
     odul: 75,
     kontrol: (stats) => stats.toplamGorev >= 5,
+    ilerleme: il((s) => s.toplamGorev, 5),
   },
   {
     id: 'gorev_30',
@@ -252,6 +280,7 @@ export const BASARIMLAR = [
     kategori: 'günlük',
     odul: 500,
     kontrol: (stats) => stats.toplamGorev >= 30,
+    ilerleme: il((s) => s.toplamGorev, 30),
   },
   // ─── Oynama Süresi ───────────────────────────────────────────
   {
@@ -262,6 +291,7 @@ export const BASARIMLAR = [
     kategori: 'süre',
     odul: 50,
     kontrol: (stats) => stats.toplamGun >= 3,
+    ilerleme: il((s) => s.toplamGun, 3),
   },
   {
     id: 'gun_30',
@@ -271,7 +301,6 @@ export const BASARIMLAR = [
     kategori: 'süre',
     odul: 500,
     kontrol: (stats) => stats.toplamGun >= 30,
+    ilerleme: il((s) => s.toplamGun, 30),
   },
 ];
-
-export const basarimBul = (id) => BASARIMLAR.find(b => b.id === id);

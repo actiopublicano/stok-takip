@@ -60,6 +60,10 @@ export default function FlowerPot({ saksi }) {
     saksi_sec(saksi.id);
   };
 
+  const kaliteYildiz = !bos && !olu && saksi.kalite >= 1.8 ? '✨✨'
+    : !bos && !olu && saksi.kalite >= 1.4 ? '⭐'
+    : null;
+
   return (
     <div
       className={[
@@ -72,6 +76,8 @@ export default function FlowerPot({ saksi }) {
       ].filter(Boolean).join(' ')}
       onClick={tikla}
     >
+      {kaliteYildiz && <span className="saksi-kalite-yildiz">{kaliteYildiz}</span>}
+
       {/* Çiçek görseli */}
       <div className="saksi-cicek">
         <span className={`saksi-emoji ${hazir ? 'saksi-emoji-hazir' : soluyor ? 'saksi-emoji-soluyor' : ''}`}>

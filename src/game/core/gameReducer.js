@@ -1,8 +1,8 @@
 // Oyun state reducer - tüm oyun mantığı burada
 
-import { ASAMA, XP_KAZAN, SEVIYE_XP, TICK_ARALIK, RASTGELE_OLAY_SANS, RASTGELE_OLAYLAR } from './constants.js';
+import { ASAMA, XP_KAZAN, SEVIYE_XP, TICK_ARALIK, RASTGELE_OLAY_SANS, RASTGELE_OLAYLAR, SAAT } from './constants.js';
 import { saksiOlustur } from './initialState.js';
-import { cicekBul, NADIRLIK } from '../data/flowers.js';
+import { cicekBul, NADIRLIK, CICEKLER } from '../data/flowers.js';
 import { gubreBul, ilacBul, hastalikBul, SERA_YUKSELTMELERI } from '../data/items.js';
 import { BASARIMLAR } from '../data/achievements.js';
 import { gunlukGorevlerSec } from '../data/quests.js';
@@ -475,9 +475,12 @@ export const oyunReducer = (durum, eylem) => {
 
       if (gecenZaman < TICK_ARALIK * 0.8) return durum; // Çok erken
 
+      // Arı bonusu aktif mi?
+      const ariBonusu = durum.ui.ariBonusBitis && simdi < durum.ui.ariBonusBitis ? 1.3 : 1.0;
+
       // Saksıları güncelle
       const yeniSaksilar = durum.saksilar.map(s =>
-        saksiGuncelle(s, gecenZaman, durum.hava.mevcut, durum.mevsim.mevcut)
+        saksiGuncelle(s, gecenZaman, durum.hava.mevcut, durum.mevsim.mevcut, ariBonusu)
       );
 
       // Hava güncellemesi
@@ -524,7 +527,15 @@ export const oyunReducer = (durum, eylem) => {
         };
       }
 
-      // Rastgele olay kontrolü (her saatte ~%5 şans)
+      // İndirim / Arı bonusu süresi doldu mu?
+      let yeniUI = { ...durum.ui };
+      if (yeniUI.indirimAktif && yeniUI.indirimBitiZamani && simdi > yeniUI.indirimBitiZamani) {
+        yeniUI = { ...yeniUI, indirimAktif: false, indirimCarpani: 1.0, indirimBitiZamani: null };
+      }
+      if (yeniUI.ariBonusBitis && simdi > yeniUI.ariBonusBitis) {
+        yeniUI = { ...yeniUI, ariBonusBitis: null };
+      }
+
       let yeniDurum = {
         ...durum,
         saksilar: postSaksilar,
@@ -532,6 +543,7 @@ export const oyunReducer = (durum, eylem) => {
         mevsim: yeniMevsim,
         istatistikler: yeniIstat,
         gorevler: yeniGorevler,
+        ui: yeniUI,
         meta: { ...durum.meta, sonTickZamani: simdi },
       };
 
@@ -547,6 +559,72 @@ export const oyunReducer = (durum, eylem) => {
             { ...olay, baslangic: simdi },
           ].slice(-3),
         };
+
+        // Olay efektlerini uygula
+        if (olay.etki === 'bedava_sulama') {
+          yeniDurum = {
+            ...yeniDurum,
+            saksilar: yeniDurum.saksilar.map(s =>
+              s.asama === ASAMA.BOS || s.asama === ASAMA.OLDU ? s
+                : { ...s, sonSulamaZamani: simdi, suSeviyesi: 100 }
+            ),
+          };
+        } else if (olay.etki === 'nadir_tohum') {
+          const nadirler = CICEKLER.filter(c => c.nadirlik === NADIRLIK.NADIR);
+          const sec = nadirler[Math.floor(Math.random() * nadirler.length)];
+          if (sec) {
+            yeniDurum = {
+              ...yeniDurum,
+              envanter: {
+                ...yeniDurum.envanter,
+                tohumlar: {
+                  ...yeniDurum.envanter.tohumlar,
+                  [sec.id]: (yeniDurum.envanter.tohumlar[sec.id] ?? 0) + 1,
+                },
+              },
+            };
+          }
+        } else if (olay.etki === 'efsanevi_tohum') {
+          const egzotikler = CICEKLER.filter(c =>
+            c.nadirlik === NADIRLIK.EGZOTIK || c.nadirlik === NADIRLIK.EFSANEVI
+          );
+          const sec = egzotikler[Math.floor(Math.random() * egzotikler.length)];
+          if (sec) {
+            yeniDurum = {
+              ...yeniDurum,
+              envanter: {
+                ...yeniDurum.envanter,
+                tohumlar: {
+                  ...yeniDurum.envanter.tohumlar,
+                  [sec.id]: (yeniDurum.envanter.tohumlar[sec.id] ?? 0) + 1,
+                },
+              },
+            };
+          }
+        } else if (olay.etki === 'indirim') {
+          yeniDurum = {
+            ...yeniDurum,
+            ui: {
+              ...yeniDurum.ui,
+              indirimAktif: true,
+              indirimCarpani: 0.7,
+              indirimBitiZamani: simdi + 2 * SAAT,
+            },
+          };
+        } else if (olay.etki === 'buyume_hizi') {
+          yeniDurum = {
+            ...yeniDurum,
+            ui: { ...yeniDurum.ui, ariBonusBitis: simdi + 2 * SAAT },
+          };
+        } else if (olay.etki === 'gubre_bonus') {
+          yeniDurum = {
+            ...yeniDurum,
+            saksilar: yeniDurum.saksilar.map(s =>
+              s.asama === ASAMA.BOS || s.asama === ASAMA.OLDU ? s
+                : { ...s, kalite: Math.min(2.0, (s.kalite ?? 1.0) * 1.2) }
+            ),
+          };
+        }
       }
 
       return yeniDurum;
@@ -561,7 +639,7 @@ export const oyunReducer = (durum, eylem) => {
       if (gecenZaman < 5000) return durum;
 
       const yeniSaksilar = durum.saksilar.map(s =>
-        saksiGuncelle(s, gecenZaman, durum.hava.mevcut, durum.mevsim.mevcut)
+        saksiGuncelle(s, gecenZaman, durum.hava.mevcut, durum.mevsim.mevcut, 1.0)
       );
 
       const saat = Math.floor(gecenZaman / 3600000);
