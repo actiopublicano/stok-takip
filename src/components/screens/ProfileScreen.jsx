@@ -1,7 +1,9 @@
 // Profil ekranı - istatistikler, günlük görevler, kayıt
 
+import { useState } from 'react';
 import { useOyun } from '../../context/GameContext.jsx';
 import { kaydet, sil } from '../../game/core/saveManager.js';
+import { izinIste, izinDurumu } from '../../game/systems/notificationSystem.js';
 
 const sureYaz = (ms) => {
   if (!ms) return '0dk';
@@ -14,8 +16,23 @@ const sureYaz = (ms) => {
 export default function ProfileScreen() {
   const { durum, dispatch, manuelKaydet } = useOyun();
   const { oyuncu, istatistikler, gorevler, hava, mevsim } = durum;
+  const [bildirimIzni, setBildirimIzni] = useState(izinDurumu());
 
   const gunlukGorevler = gorevler.gunluk ?? [];
+  const haftalikGorevler = gorevler.haftalik ?? [];
+
+  const haftalikKalanSure = () => {
+    const yenilemeZamani = (gorevler.haftalikSonYenileme ?? Date.now()) + 7 * 24 * 3600000;
+    const ms = Math.max(0, yenilemeZamani - Date.now());
+    const gun = Math.floor(ms / 86400000);
+    const saat = Math.floor((ms % 86400000) / 3600000);
+    return gun > 0 ? `${gun}g ${saat}sa` : `${saat}sa`;
+  };
+
+  const bildirimAc = async () => {
+    const verildi = await izinIste();
+    setBildirimIzni(verildi ? 'granted' : 'denied');
+  };
 
   const gorevKalanSure = () => {
     const gece = new Date();
@@ -73,6 +90,33 @@ export default function ProfileScreen() {
         ))}
       </div>
 
+      {/* Haftalık Görevler */}
+      <div className="profil-bolum">
+        <div className="profil-bolum-baslik" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>📅 Haftalık Görevler</span>
+          <span className="gorev-yenileme">⏰ {haftalikKalanSure()}'da yenilenir</span>
+        </div>
+        {haftalikGorevler.map((gorev, i) => (
+          <div key={i} className={`gorev-kart gorev-haftalik ${gorev.tamamlandi ? 'gorev-tamam' : ''}`}>
+            <span className="gorev-emoji">{gorev.emoji}</span>
+            <div className="gorev-bilgi">
+              <div className="gorev-metin">{gorev.metin}</div>
+              <div className="gorev-ilerleme-yazi">
+                {gorev.mevcut}/{gorev.hedefMiktar}
+                {gorev.tamamlandi && ' ✅'}
+              </div>
+              <div className="gorev-ilerleme-bg">
+                <div
+                  className="gorev-ilerleme-dolu"
+                  style={{ width: `${Math.min(100, (gorev.mevcut / gorev.hedefMiktar) * 100)}%` }}
+                />
+              </div>
+            </div>
+            <div className="gorev-odul gorev-odul-haftalik">+{gorev.odul} 💰</div>
+          </div>
+        ))}
+      </div>
+
       {/* İstatistikler */}
       <div className="profil-bolum">
         <div className="profil-bolum-baslik">📊 İstatistikler</div>
@@ -121,6 +165,22 @@ export default function ProfileScreen() {
           <div>Sera: Seviye {durum.sera.seviye}</div>
         </div>
       </div>
+
+      {/* Bildirimler */}
+      {bildirimIzni !== 'desteklenmiyor' && (
+        <div className="profil-bolum">
+          <div className="profil-bolum-baslik">🔔 Bildirimler</div>
+          {bildirimIzni === 'granted' ? (
+            <div className="profil-bildirim-aktif">✅ Bildirimler açık — hasat ve hastalık uyarıları alacaksın.</div>
+          ) : bildirimIzni === 'denied' ? (
+            <div className="profil-bildirim-aktif" style={{ color: '#ef9a9a' }}>⛔ Tarayıcıda bildirim izni reddedilmiş. Ayarlardan değiştir.</div>
+          ) : (
+            <button className="profil-bildirim-btn" onClick={bildirimAc}>
+              🔔 Bildirimlere İzin Ver
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Kayıt Butonları */}
       <div className="profil-bolum">

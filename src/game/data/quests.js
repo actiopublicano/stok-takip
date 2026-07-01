@@ -145,5 +145,27 @@ export const gunlukGorevlerSec = () => {
     ...g,
     mevcut: 0,
     tamamlandi: false,
+    odulVerildi: false,
+  }));
+};
+
+export const HAFTALIK_GOREV_HAVUZU = [
+  { id: 'hg_10_yetistir', metin: '10 çiçek yetiştir.', emoji: '🌸', tip: 'yetistir', hedefCicek: null, hedefMiktar: 10, odul: 200 },
+  { id: 'hg_20_sat',      metin: '20 çiçek sat.',       emoji: '🛒', tip: 'sat',      hedefCicek: null, hedefMiktar: 20, odul: 250 },
+  { id: 'hg_500_para',    metin: '500 bozuk para kazan.', emoji: '💰', tip: 'kazan',  hedefCicek: null, hedefMiktar: 500, odul: 150 },
+  { id: 'hg_50_sulama',   metin: '50 kez sula.',         emoji: '💧', tip: 'sula',    hedefCicek: null, hedefMiktar: 50,  odul: 100 },
+  { id: 'hg_3_hastalik',  metin: '3 hastalığı iyileştir.', emoji: '💊', tip: 'iyilestir', hedefCicek: null, hedefMiktar: 3, odul: 180 },
+  { id: 'hg_10_gubre',    metin: '10 kez gübre kullan.', emoji: '⚡', tip: 'gubre',   hedefCicek: null, hedefMiktar: 10, odul: 120 },
+  { id: 'hg_5_nadir',     metin: '5 nadir çiçek yetiştir.', emoji: '⭐', tip: 'yetistir_nadirlik', hedefNadirlik: 'nadir', hedefMiktar: 5, odul: 500 },
+  { id: 'hg_egzotik',     metin: '1 egzotik çiçek yetiştir.', emoji: '🌟', tip: 'yetistir_nadirlik', hedefNadirlik: 'egzotik', hedefMiktar: 1, odul: 350 },
+];
+
+export const haftalikGorevlerSec = () => {
+  const karistir = [...HAFTALIK_GOREV_HAVUZU].sort(() => Math.random() - 0.5);
+  return karistir.slice(0, 3).map(g => ({
+    ...g,
+    mevcut: 0,
+    tamamlandi: false,
+    odulVerildi: false,
   }));
 };

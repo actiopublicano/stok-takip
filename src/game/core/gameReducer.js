@@ -5,7 +5,7 @@ import { saksiOlustur } from './initialState.js';
 import { cicekBul, NADIRLIK, CICEKLER } from '../data/flowers.js';
 import { gubreBul, ilacBul, hastalikBul, SERA_YUKSELTMELERI } from '../data/items.js';
 import { BASARIMLAR } from '../data/achievements.js';
-import { gunlukGorevlerSec } from '../data/quests.js';
+import { gunlukGorevlerSec, haftalikGorevlerSec } from '../data/quests.js';
 import { saksiGuncelle, satisFiyatiHesapla } from '../systems/growthSystem.js';
 import { yeniHavaUret, havaDegistirilmeli, mevsimiBul } from '../systems/weatherSystem.js';
 
@@ -60,34 +60,36 @@ const basarimlariKontrolEt = (durum) => {
   return yeniDurum;
 };
 
-// Günlük görev ilerlemesini güncelle
+// Görev ilerlemesini güncelle (günlük + haftalık)
 const gorevleriGuncelle = (durum, tip, cicekId, nadirlik, miktar = 1) => {
-  const simdi = Date.now();
-  const gunluk = durum.gorevler.gunluk.map(gorev => {
+  const guncelleArr = (arr) => (arr ?? []).map(gorev => {
     if (gorev.tamamlandi) return gorev;
-
     let eslesme = false;
     if (gorev.tip === tip) {
       if (!gorev.hedefCicek && !gorev.hedefNadirlik) eslesme = true;
       else if (gorev.hedefCicek && gorev.hedefCicek === cicekId) eslesme = true;
       else if (gorev.hedefNadirlik && gorev.hedefNadirlik === nadirlik) eslesme = true;
     }
-
     if (!eslesme) return gorev;
-
     const yeniMevcut = gorev.mevcut + miktar;
-    const tamamlandi = yeniMevcut >= gorev.hedefMiktar;
-    return { ...gorev, mevcut: yeniMevcut, tamamlandi };
+    return { ...gorev, mevcut: yeniMevcut, tamamlandi: yeniMevcut >= gorev.hedefMiktar };
   });
 
-  return { ...durum, gorevler: { ...durum.gorevler, gunluk } };
+  return {
+    ...durum,
+    gorevler: {
+      ...durum.gorevler,
+      gunluk: guncelleArr(durum.gorevler.gunluk),
+      haftalik: guncelleArr(durum.gorevler.haftalik),
+    },
+  };
 };
 
-// Görev ödüllerini ver
+// Görev ödüllerini ver (günlük + haftalık)
 const gorevOdulleriVer = (durum) => {
   let para = 0;
   let gorevSayisi = 0;
-  const gunluk = durum.gorevler.gunluk.map(g => {
+  const odulleArr = (arr) => (arr ?? []).map(g => {
     if (g.tamamlandi && !g.odulVerildi) {
       para += g.odul;
       gorevSayisi++;
@@ -96,11 +98,14 @@ const gorevOdulleriVer = (durum) => {
     return g;
   });
 
+  const gunluk = odulleArr(durum.gorevler.gunluk);
+  const haftalik = odulleArr(durum.gorevler.haftalik);
+
   if (gorevSayisi === 0) return durum;
 
   let yeniDurum = {
     ...durum,
-    gorevler: { ...durum.gorevler, gunluk },
+    gorevler: { ...durum.gorevler, gunluk, haftalik },
     oyuncu: { ...durum.oyuncu, para: durum.oyuncu.para + para },
   };
   yeniDurum = istatGuncelle(yeniDurum, {
@@ -276,11 +281,9 @@ export const oyunReducer = (durum, eylem) => {
       const cicek = cicekBul(saksi.cicekId);
       if (!cicek) return durum;
 
-      const fiyat = satisFiyatiHesapla(
-        cicek,
-        saksi.kalite,
-        durum.ui.indirimAktif ? durum.ui.indirimCarpani : 1.0
-      );
+      const pazarCarpani = (durum.pazar?.gunlukCicek === saksi.cicekId) ? 2.0 : 1.0;
+      const indirimCarpani = durum.ui.indirimAktif ? durum.ui.indirimCarpani : 1.0;
+      const fiyat = Math.round(satisFiyatiHesapla(cicek, saksi.kalite, indirimCarpani) * pazarCarpani);
 
       const yeniKoleksiyon = {
         ...durum.koleksiyon,
@@ -322,6 +325,74 @@ export const oyunReducer = (durum, eylem) => {
       yeniDurum = gorevleriGuncelle(yeniDurum, 'kazan', null, null, fiyat);
       yeniDurum = gorevOdulleriVer(yeniDurum);
       yeniDurum = bildirimEkle(yeniDurum, `${cicek.emoji} ${cicek.name} hasat edildi! +${fiyat} 💰`, 'basari');
+      return basarimlariKontrolEt(yeniDurum);
+    }
+
+    // ── TOPLU HASAT ───────────────────────────────────────────────
+    case 'TOPLU_HASAT': {
+      const hazirlar = durum.saksilar.filter(s => s.asama === ASAMA.HAZIR);
+      if (hazirlar.length === 0) return durum;
+
+      let toplamFiyat = 0;
+      let toplamXP = 0;
+      let yeniKoleksiyon = { ...durum.koleksiyon };
+      const istatGuncel = {
+        toplamSatis: durum.istatistikler.toplamSatis,
+        toplamYetistirme: durum.istatistikler.toplamYetistirme,
+        toplamKazanc: durum.istatistikler.toplamKazanc,
+        nadirYetistirme: durum.istatistikler.nadirYetistirme ?? 0,
+        egzotikYetistirme: durum.istatistikler.egzotikYetistirme ?? 0,
+        efsaneviYetistirme: durum.istatistikler.efsaneviYetistirme ?? 0,
+      };
+
+      const indirimCarpani = durum.ui.indirimAktif ? durum.ui.indirimCarpani : 1.0;
+      const gunlukCicekId = durum.pazar?.gunlukCicek;
+
+      hazirlar.forEach(saksi => {
+        const cicek = cicekBul(saksi.cicekId);
+        if (!cicek) return;
+        const pazarCarpani = gunlukCicekId === saksi.cicekId ? 2.0 : 1.0;
+        const fiyat = Math.round(satisFiyatiHesapla(cicek, saksi.kalite, indirimCarpani) * pazarCarpani);
+        toplamFiyat += fiyat;
+        toplamXP += XP_KAZAN.cicekSat + XP_KAZAN.cicekYetistir;
+        istatGuncel.toplamSatis++;
+        istatGuncel.toplamYetistirme++;
+        istatGuncel.toplamKazanc += fiyat;
+        if (cicek.nadirlik === NADIRLIK.NADIR) istatGuncel.nadirYetistirme++;
+        if (cicek.nadirlik === NADIRLIK.EGZOTIK) istatGuncel.egzotikYetistirme++;
+        if (cicek.nadirlik === NADIRLIK.EFSANEVI) istatGuncel.efsaneviYetistirme++;
+        yeniKoleksiyon = {
+          ...yeniKoleksiyon,
+          [saksi.cicekId]: {
+            sayi: (yeniKoleksiyon[saksi.cicekId]?.sayi ?? 0) + 1,
+            enIyiKalite: Math.max(yeniKoleksiyon[saksi.cicekId]?.enIyiKalite ?? 0, saksi.kalite),
+            ilkZaman: yeniKoleksiyon[saksi.cicekId]?.ilkZaman ?? Date.now(),
+          },
+        };
+      });
+
+      const yeniSaksilar = durum.saksilar.map(s =>
+        s.asama === ASAMA.HAZIR ? saksiOlustur(s.id) : s
+      );
+
+      let yeniDurum = {
+        ...durum,
+        saksilar: yeniSaksilar,
+        oyuncu: { ...durum.oyuncu, para: durum.oyuncu.para + toplamFiyat },
+        koleksiyon: yeniKoleksiyon,
+      };
+      yeniDurum = istatGuncelle(yeniDurum, istatGuncel);
+      yeniDurum = xpEkle(yeniDurum, toplamXP);
+      hazirlar.forEach(saksi => {
+        const cicek = cicekBul(saksi.cicekId);
+        if (!cicek) return;
+        yeniDurum = gorevleriGuncelle(yeniDurum, 'sat', cicek.id, cicek.nadirlik);
+        yeniDurum = gorevleriGuncelle(yeniDurum, 'yetistir', cicek.id, cicek.nadirlik);
+        yeniDurum = gorevleriGuncelle(yeniDurum, 'yetistir_nadirlik', cicek.id, cicek.nadirlik);
+      });
+      yeniDurum = gorevleriGuncelle(yeniDurum, 'kazan', null, null, toplamFiyat);
+      yeniDurum = gorevOdulleriVer(yeniDurum);
+      yeniDurum = bildirimEkle(yeniDurum, `🌾 ${hazirlar.length} çiçek hasat edildi! +${toplamFiyat} 💰`, 'basari');
       return basarimlariKontrolEt(yeniDurum);
     }
 
@@ -522,9 +593,27 @@ export const oyunReducer = (durum, eylem) => {
       const sonYenilemeGun = new Date(durum.gorevler.sonYenileme).toDateString();
       if (suanGece !== sonYenilemeGun) {
         yeniGorevler = {
+          ...yeniGorevler,
           gunluk: gunlukGorevlerSec(),
           sonYenileme: simdi,
         };
+      }
+
+      // Haftalık görev yenileme (7 günde bir)
+      const HAFTALIK_ARALIK = 7 * 24 * 3600000;
+      if (simdi - (durum.gorevler.haftalikSonYenileme ?? 0) > HAFTALIK_ARALIK) {
+        yeniGorevler = {
+          ...yeniGorevler,
+          haftalik: haftalikGorevlerSec(),
+          haftalikSonYenileme: simdi,
+        };
+      }
+
+      // Günün çiçeği güncelle (günlük)
+      let yeniPazar = durum.pazar ?? { gunlukCicek: null, sonGuncelleme: '' };
+      if (suanGece !== yeniPazar.sonGuncelleme) {
+        const rastgele = CICEKLER[Math.floor(Math.random() * CICEKLER.length)];
+        yeniPazar = { gunlukCicek: rastgele.id, sonGuncelleme: suanGece };
       }
 
       // İndirim / Arı bonusu süresi doldu mu?
@@ -543,6 +632,7 @@ export const oyunReducer = (durum, eylem) => {
         mevsim: yeniMevsim,
         istatistikler: yeniIstat,
         gorevler: yeniGorevler,
+        pazar: yeniPazar,
         ui: yeniUI,
         meta: { ...durum.meta, sonTickZamani: simdi },
       };

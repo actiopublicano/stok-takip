@@ -2,7 +2,7 @@
 
 import { BASLANGIC_PARASI } from './constants.js';
 import { AY_MEVSIM, HAVA } from './constants.js';
-import { gunlukGorevlerSec } from '../data/quests.js';
+import { gunlukGorevlerSec, haftalikGorevlerSec } from '../data/quests.js';
 
 const bugun = new Date();
 const mevsim = AY_MEVSIM[bugun.getMonth()];
@@ -61,10 +61,18 @@ export const baslangicDurumu = {
   basarimlar: {},
   // Yapı: { basarimId: { acilisZamani: timestamp } }
 
-  // Günlük görevler
+  // Görevler
   gorevler: {
     gunluk: gunlukGorevlerSec(),
     sonYenileme: Date.now(),
+    haftalik: haftalikGorevlerSec(),
+    haftalikSonYenileme: Date.now(),
+  },
+
+  // Pazar (günlük çiçek fiyat bonusu)
+  pazar: {
+    gunlukCicek: null,
+    sonGuncelleme: '',
   },
 
   // Aktif rastgele olaylar

@@ -1,21 +1,22 @@
 // React Context - oyun durumu ve dispatch fonksiyonunu sağlar
 
-import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import { createContext, useContext, useReducer, useEffect, useRef, useCallback } from 'react';
 import { oyunReducer } from '../game/core/gameReducer.js';
 import { baslangicDurumu } from '../game/core/initialState.js';
 import { kaydet, yukle } from '../game/core/saveManager.js';
-import { TICK_ARALIK } from '../game/core/constants.js';
+import { TICK_ARALIK, ASAMA } from '../game/core/constants.js';
+import { bildirimGonder } from '../game/systems/notificationSystem.js';
 
 const OyunContext = createContext(null);
 
 export const OyunSaglayici = ({ children }) => {
-  // Kayıttan yükle veya başlangıç durumu kullan (ham - offline sync reducer'da yapılır)
   const baslangic = () => {
     const kayitliDurum = yukle();
     return kayitliDurum ?? baslangicDurumu;
   };
 
   const [durum, dispatch] = useReducer(oyunReducer, null, baslangic);
+  const oncekiSaksilar = useRef(null);
 
   // Oyun başlangıcında offline senkron + günlük giriş bonusu
   useEffect(() => {
@@ -54,6 +55,29 @@ export const OyunSaglayici = ({ children }) => {
     };
   }, [durum]);
 
+  // Tarayıcı bildirimleri: hasat/hastalık/olay değişimlerini izle
+  useEffect(() => {
+    const onceki = oncekiSaksilar.current;
+    if (!onceki) {
+      oncekiSaksilar.current = durum.saksilar;
+      return;
+    }
+
+    durum.saksilar.forEach(saksi => {
+      const eski = onceki.find(s => s.id === saksi.id);
+      if (!eski) return;
+
+      if (eski.asama !== ASAMA.HAZIR && saksi.asama === ASAMA.HAZIR) {
+        bildirimGonder('🌸 Çiçek Hazır!', `${saksi.cicekId} hasat edilmeye hazır.`);
+      }
+      if (!eski.hastalik && saksi.hastalik) {
+        bildirimGonder('🦠 Hastalık Uyarısı!', 'Bir çiçeğin hastalandı, ilaç uygula!');
+      }
+    });
+
+    oncekiSaksilar.current = durum.saksilar;
+  }, [durum.saksilar]);
+
   // Kolaylık fonksiyonları
   const tohumu_ek = useCallback((saksiId, cicekId) =>
     dispatch({ tip: 'TOHUM_EK', saksiId, cicekId }), []);
@@ -66,6 +90,9 @@ export const OyunSaglayici = ({ children }) => {
 
   const hasat = useCallback((saksiId) =>
     dispatch({ tip: 'HASAT', saksiId }), []);
+
+  const toplu_hasat = useCallback(() =>
+    dispatch({ tip: 'TOPLU_HASAT' }), []);
 
   const hastalik_tedavi = useCallback((saksiId, ilacId) =>
     dispatch({ tip: 'HASTALIK_TEDAVI', saksiId, ilacId }), []);
@@ -101,11 +128,11 @@ export const OyunSaglayici = ({ children }) => {
   const deger = {
     durum,
     dispatch,
-    // Kısayol fonksiyonları
     tohumu_ek,
     sula,
     gubre_uygula,
     hasat,
+    toplu_hasat,
     hastalik_tedavi,
     esya_satin_al,
     sera_yukselt,
@@ -124,7 +151,6 @@ export const OyunSaglayici = ({ children }) => {
   );
 };
 
-// Hook
 export const useOyun = () => {
   const context = useContext(OyunContext);
   if (!context) throw new Error('useOyun, OyunSaglayici içinde kullanılmalı');

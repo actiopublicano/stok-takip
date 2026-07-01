@@ -36,10 +36,11 @@ export default function ShopScreen() {
   const [aktifSekme, setAktifSekme] = useState('tohumlar');
   const [siralama, setSiralama] = useState('uygun');
   const [miktar, setMiktar] = useState(1);
-  const { oyuncu, sera, envanter, ui } = durum;
+  const { oyuncu, sera, envanter, ui, pazar } = durum;
 
   const indirimCarpani = ui.indirimAktif ? ui.indirimCarpani : 1.0;
   const indirimAktif = ui.indirimAktif;
+  const gunlukCicekId = pazar?.gunlukCicek ?? null;
 
   const erisimTohumlar = CICEKLER.filter(c => c.kilidAcLevel <= oyuncu.seviye);
 
@@ -136,18 +137,25 @@ export default function ShopScreen() {
         {/* TOHUMLAR */}
         {aktifSekme === 'tohumlar' && (
           <div className="dukkan-liste">
+            {gunlukCicekId && (
+              <div className="dukkan-gunun-cicegi-banner">
+                🔥 Günün Çiçeği: {CICEKLER.find(c => c.id === gunlukCicekId)?.emoji} {CICEKLER.find(c => c.id === gunlukCicekId)?.name} — 2× Satış Fiyatı!
+              </div>
+            )}
             {siraliTohumlar.map(cicek => {
               const stok = envanter.tohumlar[cicek.id] ?? 0;
               const uygun = mevsimUyumlu(cicek);
               const toplamFiyat = Math.round(cicek.tohumFiyati * miktar * indirimCarpani);
               const yetersizPara = oyuncu.para < toplamFiyat;
+              const pazarSecili = cicek.id === gunlukCicekId;
               return (
-                <div key={cicek.id} className={`dukkan-urun-kart ${!uygun ? 'dukkan-urun-mevsim-dis' : ''}`}>
+                <div key={cicek.id} className={`dukkan-urun-kart ${!uygun ? 'dukkan-urun-mevsim-dis' : ''} ${pazarSecili ? 'dukkan-urun-pazar' : ''}`}>
                   <div className="dukkan-urun-sol">
                     <span className="dukkan-urun-emoji">{cicek.emoji}</span>
                     <div className="dukkan-urun-bilgi">
                       <div className="dukkan-urun-ad">
                         {cicek.name}
+                        {pazarSecili && <span className="dukkan-pazar-rozet">🔥 2×</span>}
                         <span
                           className="dukkan-nadirlik"
                           style={{ backgroundColor: nadirlikRengi[cicek.nadirlik] }}
@@ -156,7 +164,7 @@ export default function ShopScreen() {
                         </span>
                       </div>
                       <div className="dukkan-urun-detay">
-                        ⏱{sureYaz(cicek.buyumeZamani)} • 💰satış:{cicek.satisFiyati}
+                        ⏱{sureYaz(cicek.buyumeZamani)} • 💰satış:{pazarSecili ? cicek.satisFiyati * 2 : cicek.satisFiyati}
                         {!uygun && <span className="dukkan-mevsim-uyari"> ❄️ Mevsim dışı</span>}
                       </div>
                       <div className="dukkan-stok">

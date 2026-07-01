@@ -1737,3 +1737,95 @@ body {
   color: rgba(255,255,255,0.45);
   font-weight: 400;
 }
+
+/* ─── FAZ 5: TOPLU HASAT + GÜNÜN ÇİÇEĞİ + HAFTALIK GÖREVLER ────── */
+
+.sera-gunun-cicegi {
+  margin: 6px 10px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #ff6f00, #e65100);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(255,111,0,0.35);
+}
+
+.sera-toplu-hasat {
+  margin: 6px 10px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  width: calc(100% - 20px);
+  box-shadow: 0 3px 10px rgba(46,125,50,0.4);
+  transition: transform 0.1s ease;
+}
+.sera-toplu-hasat:active { transform: scale(0.97); }
+
+/* Dükkan günün çiçeği banner */
+.dukkan-gunun-cicegi-banner {
+  background: linear-gradient(135deg, #ff6f00, #e65100);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+/* Dükkan pazar rozeti */
+.dukkan-pazar-rozet {
+  background: #ff6f00;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 4px;
+}
+
+/* Dükkan pazar seçili kart */
+.dukkan-urun-pazar {
+  border-left: 3px solid #ff6f00 !important;
+  background: rgba(255,111,0,0.07) !important;
+}
+
+/* Haftalık görev kartı */
+.gorev-haftalik {
+  border-left: 3px solid #7c4dff;
+}
+.gorev-haftalik .gorev-ilerleme-dolu {
+  background: linear-gradient(90deg, #7c4dff, #aa00ff);
+}
+
+/* Haftalık ödül */
+.gorev-odul-haftalik {
+  color: #ce93d8;
+  font-weight: 800;
+}
+
+/* Profil bildirim */
+.profil-bildirim-aktif {
+  font-size: 12px;
+  color: #a5d6a7;
+  padding: 8px 0;
+}
+
+.profil-bildirim-btn {
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}

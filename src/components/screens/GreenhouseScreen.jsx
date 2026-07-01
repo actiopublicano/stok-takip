@@ -6,6 +6,8 @@ import PotModal from '../ui/PotModal.jsx';
 import QuickActions from '../ui/QuickActions.jsx';
 import { HAVA_IKONU, MEVSIM_IKONU } from '../../game/systems/weatherSystem.js';
 import { ASAMA } from '../../game/core/constants.js';
+import { cicekBul } from '../../game/data/flowers.js';
+import { ses } from '../../game/systems/soundSystem.js';
 
 const kalanSureYaz = (bitiZamani) => {
   if (!bitiZamani) return '';
@@ -17,11 +19,19 @@ const kalanSureYaz = (bitiZamani) => {
 };
 
 export default function GreenhouseScreen() {
-  const { durum } = useOyun();
-  const { saksilar, hava, mevsim, aktifOlaylar, ui } = durum;
+  const { durum, toplu_hasat } = useOyun();
+  const { saksilar, hava, mevsim, aktifOlaylar, ui, pazar } = durum;
 
   const dolu = saksilar.filter(s => s.asama !== ASAMA.BOS).length;
   const kapasit = saksilar.length;
+  const hasatSayisi = saksilar.filter(s => s.asama === ASAMA.HAZIR).length;
+
+  const gunlukCicek = pazar?.gunlukCicek ? cicekBul(pazar.gunlukCicek) : null;
+
+  const handleTopluHasat = () => {
+    toplu_hasat();
+    ses.hasat?.();
+  };
 
   const indirimKalan = ui.indirimAktif ? kalanSureYaz(ui.indirimBitiZamani) : null;
   const ariKalan = ui.ariBonusBitis && Date.now() < ui.ariBonusBitis ? kalanSureYaz(ui.ariBonusBitis) : null;
@@ -62,6 +72,20 @@ export default function GreenhouseScreen() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Günün çiçeği */}
+      {gunlukCicek && (
+        <div className="sera-gunun-cicegi">
+          🔥 Günün Çiçeği: {gunlukCicek.emoji} {gunlukCicek.name} — 2× Satış Fiyatı!
+        </div>
+      )}
+
+      {/* Toplu hasat butonu */}
+      {hasatSayisi > 0 && (
+        <button className="sera-toplu-hasat" onClick={handleTopluHasat}>
+          🌾 Tümünü Hasat Et ({hasatSayisi})
+        </button>
       )}
 
       {/* Hızlı eylemler */}
