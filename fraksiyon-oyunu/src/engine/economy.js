@@ -15,7 +15,10 @@ export function runEconomyStep(draft, log = []) {
   runWelfareDrift(draft)
 
   draft.global.nationalUnemployment = computeNationalUnemployment(draft.regions)
-  for (const r of draft.regions) r.strikeActive = false
+  for (const r of draft.regions) {
+    if (!r.strikeActive) r.consecutiveStrikes = 0
+    r.strikeActive = false
+  }
 }
 
 function runProduction(draft) {
@@ -69,9 +72,9 @@ function runGrowth(draft, totals) {
   sirket.resources.production = totals.sirketTradeValue
   sirket.tradeValueShare = totals.totalTradeValue > 0 ? totals.sirketTradeValue / totals.totalTradeValue : 0
 
-  const finansRate = clamp(0.03 + (finans.growthBonus || 0), -0.2, 0.3)
+  const finansRate = clamp(0.015 + (finans.growthBonus || 0), -0.2, 0.3)
   finans.resources.capital = Math.max(0, finans.resources.capital + finans.resources.capital * finansRate)
-  finans.portfolio = finans.resources.capital + finans.loans.reduce((s, l) => s + l.principal, 0)
+  finans.portfolio = finans.resources.capital + finans.loans.reduce((s, l) => s + (l.remainingPrincipal ?? l.principal), 0)
 
   halk.resources.production = halk.resources.labor * (halk.laborEfficiency || 1) * 0.15
   halk.resources.labor = Math.max(0, halk.resources.labor * 0.7)
@@ -104,10 +107,14 @@ function runLoans(draft, log) {
   const remaining = []
   for (const loan of finans.loans) {
     const target = getFaction(draft, loan.targetFactionId)
-    const installment = loan.principal / 3 + loan.principal * loan.interestRate
+    const principalDue = loan.principal / 3
+    const interestDue = loan.principal * loan.interestRate
+    const installment = principalDue + interestDue
     const paid = Math.min(installment, target.resources.capital)
     target.resources.capital -= paid
     finans.resources.capital += paid
+    const principalPaid = Math.min(principalDue, paid)
+    loan.remainingPrincipal = Math.max(0, (loan.remainingPrincipal ?? loan.principal) - principalPaid)
     if (paid < installment) {
       log.push(`${loan.targetFactionId} kredi taksitini tam ödeyemedi, Finans zarar yazdı.`)
     }
@@ -127,7 +134,7 @@ function runPositions(draft, log) {
       const rose = region.production > position.baselineProduction
       const won = (position.direction === 'artis' && rose) || (position.direction === 'azalis' && !rose)
       if (won) {
-        finans.resources.capital += position.stake * 1.8
+        finans.resources.capital += position.stake * 1.4
         log.push(`Finans, ${region.name} pozisyonunu kazandı.`)
       } else {
         log.push(`Finans, ${region.name} pozisyonunu kaybetti.`)

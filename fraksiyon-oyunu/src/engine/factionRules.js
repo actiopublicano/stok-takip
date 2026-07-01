@@ -21,7 +21,7 @@ export const FACTION_ACTIONS = {
         halk.welfareIndex = clamp(halk.welfareIndex + 1.5, 0, 100)
       },
       scoreHint() {
-        return { self: 1.2, inflation: 0, unemployment: -0.3, risk: 0.1 }
+        return { self: 1.4, inflation: 0, unemployment: -0.3, risk: 0.1 }
       },
     },
     grev: {
@@ -34,12 +34,13 @@ export const FACTION_ACTIONS = {
         const halk = getFaction(draft, 'halk')
         const sirket = getFaction(draft, 'sirket')
         region.strikeActive = true
+        region.consecutiveStrikes = (region.consecutiveStrikes || 0) + 1
         halk.welfareIndex = clamp(halk.welfareIndex + 2.5, 0, 100)
         halk.dayanisma = clamp((halk.dayanisma || 0) + 4, 0, 100)
         sirket.resources.capital = Math.max(0, sirket.resources.capital - region.prodCapacity * 0.6)
       },
       scoreHint() {
-        return { self: 1.6, inflation: 0.1, unemployment: 0.15, risk: 0.5 }
+        return { self: 1.0, inflation: 0.1, unemployment: 0.15, risk: 0.5 }
       },
     },
     yatirim: {
@@ -67,12 +68,12 @@ export const FACTION_ACTIONS = {
       label: 'Fabrika Kur',
       description: 'Seçilen bölgede üretim kapasitesi büyür, bölge Şirket etkisine girer.',
       needsRegion: true,
-      cost: 22,
+      cost: 18,
       apply(draft, { regionId }) {
         const region = getRegion(draft, regionId)
         const sirket = getFaction(draft, 'sirket')
-        if (sirket.resources.capital < 22) return
-        sirket.resources.capital -= 22
+        if (sirket.resources.capital < 18) return
+        sirket.resources.capital -= 18
         region.prodCapacity = clamp(region.prodCapacity + 1.2, 0, 20)
         region.dominantFaction = 'sirket'
       },
@@ -182,7 +183,8 @@ export const FACTION_ACTIONS = {
         finans.loans.push({
           targetFactionId,
           principal: 15,
-          interestRate: 0.12 + (finans.interestRateBonus || 0),
+          remainingPrincipal: 15,
+          interestRate: 0.07 + (finans.interestRateBonus || 0),
           turnsRemaining: 3,
         })
       },

@@ -131,7 +131,7 @@ function SirketActions({ state, draft, setDraft }) {
           disabled={!regionPick || !canAfford('fabrikaKur')}
           onClick={() => add('fabrikaKur', { regionId: regionPick })}
         >
-          Fabrika Kur (22)
+          Fabrika Kur (18)
         </Button>
       </div>
       <div className="flex items-center gap-2 mb-3">

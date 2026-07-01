@@ -40,8 +40,9 @@ export function evaluateWinConditions(draft, log) {
   devlet.streakTurns = devletMet ? (devlet.streakTurns || 0) + 1 : 0
   const inflationDistance = Math.abs(draft.global.inflation - 5.5) / 5.5
   devlet.powerIndex = Math.round(
-    clamp(100 - inflationDistance * 60, 0, 100) * 0.5 +
-      clamp((DEVLET_UNEMPLOYMENT_TARGET / Math.max(0.001, draft.global.nationalUnemployment)) * 100, 0, 100) * 0.5,
+    (clamp(100 - inflationDistance * 60, 0, 100) * 0.5 +
+      clamp((DEVLET_UNEMPLOYMENT_TARGET / Math.max(0.001, draft.global.nationalUnemployment)) * 100, 0, 100) * 0.5) *
+      0.8,
   )
 
   // Küresel Finans Ağı

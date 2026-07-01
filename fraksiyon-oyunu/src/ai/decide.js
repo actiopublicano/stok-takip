@@ -46,7 +46,8 @@ function regionBonus(actionKey, region) {
     case 'orgutlenme':
       return region.unemployment * 3
     case 'grev':
-      return region.dominantFaction === 'sirket' ? 1.5 : 0.3
+      if (region.dominantFaction !== 'sirket') return -0.6
+      return Math.max(1.5 - (region.consecutiveStrikes || 0) * 0.8, -0.5)
     case 'yatirim':
       return 1 / (region.prodCapacity + 1)
     case 'fabrikaKur':

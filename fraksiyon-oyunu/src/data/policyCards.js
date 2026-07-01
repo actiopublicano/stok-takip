@@ -189,7 +189,7 @@ export const FACTION_POLICY_CARDS = {
       scoreHints: { finans: { self: 1.4, inflation: 0, unemployment: 0, risk: 0.7 } },
       effect(draft) {
         const finans = getFaction(draft, 'finans')
-        finans.interestRateBonus = (finans.interestRateBonus || 0) + 0.06
+        finans.interestRateBonus = (finans.interestRateBonus || 0) + 0.03
       },
     },
     {
@@ -200,7 +200,7 @@ export const FACTION_POLICY_CARDS = {
       scoreHints: { finans: { self: 1.2, inflation: 0, unemployment: 0, risk: 0.6 } },
       effect(draft) {
         const finans = getFaction(draft, 'finans')
-        finans.positionMultiplierBonus = (finans.positionMultiplierBonus || 0) + 0.5
+        finans.positionMultiplierBonus = (finans.positionMultiplierBonus || 0) + 0.25
       },
     },
   ],
