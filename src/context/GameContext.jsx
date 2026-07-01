@@ -17,11 +17,13 @@ export const OyunSaglayici = ({ children }) => {
 
   const [durum, dispatch] = useReducer(oyunReducer, null, baslangic);
 
-  // Oyun başlangıcında offline senkron - sadece bir kez, kayıt varsa
+  // Oyun başlangıcında offline senkron + günlük giriş bonusu
   useEffect(() => {
+    const simdi = Date.now();
     if (yukle()) {
-      dispatch({ tip: 'OFFLINE_SENKRON', simdi: Date.now() });
+      dispatch({ tip: 'OFFLINE_SENKRON', simdi });
     }
+    dispatch({ tip: 'GUNLUK_GIRIS', simdi });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Oyun döngüsü - her 5 saniyede bir tick

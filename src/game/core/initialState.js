@@ -100,6 +100,8 @@ export const baslangicDurumu = {
     egzotikYetistirme: 0,
     efsaneviYetistirme: 0,
     sonOyunGunu: new Date().toDateString(),
+    sonGirisTarihi: '',
+    girisStreak: 0,
   },
 
   // Bildirimler kuyruğu
@@ -115,6 +117,7 @@ export const baslangicDurumu = {
     indirimCarpani: 1.0,
     indirimBitiZamani: null,
     ariBonusBitis: null,
+    gunlukBonusBilgisi: null,
   },
 
   // Meta bilgi

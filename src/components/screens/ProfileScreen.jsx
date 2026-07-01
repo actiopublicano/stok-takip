@@ -17,6 +17,15 @@ export default function ProfileScreen() {
 
   const gunlukGorevler = gorevler.gunluk ?? [];
 
+  const gorevKalanSure = () => {
+    const gece = new Date();
+    gece.setHours(24, 0, 0, 0);
+    const ms = gece.getTime() - Date.now();
+    const saat = Math.floor(ms / 3600000);
+    const dakika = Math.floor((ms % 3600000) / 60000);
+    return saat > 0 ? `${saat}sa ${dakika}dk` : `${dakika}dk`;
+  };
+
   const sifirla = () => {
     if (window.confirm('Tüm oyun verilerini silmek istediğinden emin misin?')) {
       sil();
@@ -39,7 +48,10 @@ export default function ProfileScreen() {
 
       {/* Günlük Görevler */}
       <div className="profil-bolum">
-        <div className="profil-bolum-baslik">📋 Günlük Görevler</div>
+        <div className="profil-bolum-baslik" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>📋 Günlük Görevler</span>
+          <span className="gorev-yenileme">⏰ {gorevKalanSure()}'da yenilenir</span>
+        </div>
         {gunlukGorevler.map((gorev, i) => (
           <div key={i} className={`gorev-kart ${gorev.tamamlandi ? 'gorev-tamam' : ''}`}>
             <span className="gorev-emoji">{gorev.emoji}</span>

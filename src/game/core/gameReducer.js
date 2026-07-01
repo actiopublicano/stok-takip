@@ -713,6 +713,87 @@ export const oyunReducer = (durum, eylem) => {
       return baslangicDurumu;
     }
 
+    // ── GÜNLÜK GİRİŞ BONUSU ───────────────────────────────────────
+    case 'GUNLUK_GIRIS': {
+      const simdi = Date.now();
+      const bugunStr = new Date(simdi).toDateString();
+      const sonGirisStr = durum.istatistikler.sonGirisTarihi ?? '';
+
+      if (bugunStr === sonGirisStr) return durum; // Bugün zaten giriş yapıldı
+
+      const oncekiMs = sonGirisStr ? new Date(sonGirisStr).getTime() : 0;
+      const farkGun = oncekiMs > 0 ? Math.floor((simdi - oncekiMs) / 86400000) : 999;
+      const eskiStreak = durum.istatistikler.girisStreak ?? 0;
+      const yeniStreak = farkGun <= 2 ? eskiStreak + 1 : 1;
+
+      // Streak'e göre ödül
+      let odul = 50;
+      let odulTohumId = null;
+      let mesaj = `Gün ${yeniStreak} — Her gün gel!`;
+
+      if (yeniStreak >= 30) {
+        odul = 1000;
+        const nadirler = CICEKLER.filter(c => c.nadirlik === NADIRLIK.NADIR);
+        odulTohumId = nadirler[Math.floor(Math.random() * nadirler.length)]?.id;
+        mesaj = `🔥 ${yeniStreak} gün serisi! Efsane!`;
+      } else if (yeniStreak >= 14) {
+        odul = 400;
+        const nadirler = CICEKLER.filter(c => c.nadirlik === NADIRLIK.NADIR);
+        odulTohumId = nadirler[Math.floor(Math.random() * nadirler.length)]?.id;
+        mesaj = `🔥 ${yeniStreak} gün serisi! Muhteşem!`;
+      } else if (yeniStreak >= 7) {
+        odul = 200;
+        const yaygInlar = CICEKLER.filter(c => c.nadirlik === NADIRLIK.YAYGIN);
+        odulTohumId = yaygInlar[Math.floor(Math.random() * yaygInlar.length)]?.id;
+        mesaj = `🔥 ${yeniStreak} gün serisi! Harika!`;
+      } else if (yeniStreak >= 3) {
+        odul = 100;
+        mesaj = `🔥 ${yeniStreak} gün serisi! Süper!`;
+      }
+
+      let yeniEnvanter = durum.envanter;
+      if (odulTohumId) {
+        yeniEnvanter = {
+          ...yeniEnvanter,
+          tohumlar: {
+            ...yeniEnvanter.tohumlar,
+            [odulTohumId]: (yeniEnvanter.tohumlar[odulTohumId] ?? 0) + 1,
+          },
+        };
+      }
+
+      const odulCicek = odulTohumId ? cicekBul(odulTohumId) : null;
+
+      return {
+        ...durum,
+        oyuncu: { ...durum.oyuncu, para: durum.oyuncu.para + odul },
+        envanter: yeniEnvanter,
+        istatistikler: {
+          ...durum.istatistikler,
+          sonGirisTarihi: bugunStr,
+          girisStreak: yeniStreak,
+        },
+        ui: {
+          ...durum.ui,
+          gunlukBonusBilgisi: {
+            streak: yeniStreak,
+            para: odul,
+            tohumAdi: odulCicek?.name ?? null,
+            tohumEmoji: odulCicek?.emoji ?? null,
+            mesaj,
+          },
+        },
+      };
+    }
+
+    // ── GÜNLÜK BONUS KAPAT ─────────────────────────────────────────
+    case 'BONUS_KAPAT': {
+      return {
+        ...durum,
+        ui: { ...durum.ui, gunlukBonusBilgisi: null },
+      };
+    }
+
     default:
       return durum;
   }

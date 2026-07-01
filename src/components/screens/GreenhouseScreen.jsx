@@ -68,7 +68,10 @@ export default function GreenhouseScreen() {
       <QuickActions />
 
       {/* Saksı ızgarası */}
-      <div className="sera-izgara">
+      <div
+        className="sera-izgara"
+        style={{ gridTemplateColumns: `repeat(${saksilar.length <= 9 ? 3 : 4}, 1fr)` }}
+      >
         {saksilar.map(saksi => (
           <FlowerPot key={saksi.id} saksi={saksi} />
         ))}

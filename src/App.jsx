@@ -7,6 +7,7 @@ import HUD from './components/ui/HUD.jsx';
 import NavBar from './components/ui/NavBar.jsx';
 import Bildirimler from './components/ui/Notification.jsx';
 import TutorialOverlay from './components/ui/TutorialOverlay.jsx';
+import DailyBonusModal from './components/ui/DailyBonusModal.jsx';
 import GreenhouseScreen from './components/screens/GreenhouseScreen.jsx';
 import ShopScreen from './components/screens/ShopScreen.jsx';
 import CollectionScreen from './components/screens/CollectionScreen.jsx';
@@ -36,6 +37,7 @@ function OyunIcerigi() {
       <NavBar />
       <Bildirimler />
       {tutorialAcik && <TutorialOverlay onKapat={() => setTutorialAcik(false)} />}
+      <DailyBonusModal />
     </div>
   );
 }
