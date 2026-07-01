@@ -2,8 +2,8 @@
 
 import { useOyun } from '../../context/GameContext.jsx';
 import { cicekBul } from '../../game/data/flowers.js';
-import { hastalikBul } from '../../game/data/items.js';
 import { ASAMA } from '../../game/core/constants.js';
+import { ses } from '../../game/systems/soundSystem.js';
 
 // Aşamaya göre emoji
 const ASAMA_EMOJI = {
@@ -11,26 +11,34 @@ const ASAMA_EMOJI = {
   [ASAMA.TOHUM]: '🌱',
   [ASAMA.FILIZ]: '🌿',
   [ASAMA.BUYUYOR]: '🌿',
-  [ASAMA.CICEK]: null, // çiçeğin emojisi kullanılacak
+  [ASAMA.CICEK]: null,
   [ASAMA.HAZIR]: null,
   [ASAMA.SOLUYOR]: '🥀',
   [ASAMA.OLDU]: '💀',
 };
 
 // Su seviyesi rengi
-const suRengi = (seviye) => {
-  if (seviye >= 60) return '#4fc3f7';
-  if (seviye >= 30) return '#ffb74d';
-  if (seviye >= 10) return '#ef5350';
+const suRengi = (s) => {
+  if (s >= 60) return '#4fc3f7';
+  if (s >= 30) return '#ffb74d';
+  if (s >= 10) return '#ef5350';
   return '#bdbdbd';
 };
 
-// Su seviyesi ikonu
-const suIkonu = (seviye) => {
-  if (seviye >= 60) return '💧';
-  if (seviye >= 30) return '💧';
-  if (seviye > 0) return '🏜️';
-  return '🏜️';
+// Kalan süreyi okunabilir metne dönüştür
+const kalanMetin = (ilerleme, buyumeZamani) => {
+  if (!buyumeZamani || ilerleme >= 100) return null;
+  const kalanMs = buyumeZamani * (1 - ilerleme / 100);
+  if (kalanMs <= 0) return null;
+  const saat = Math.floor(kalanMs / 3600000);
+  const dakika = Math.floor((kalanMs % 3600000) / 60000);
+  if (saat >= 24) {
+    const gun = Math.floor(saat / 24);
+    return `${gun}g ${saat % 24}s`;
+  }
+  if (saat > 0) return `${saat}s ${dakika}dk`;
+  if (dakika > 0) return `${dakika}dk`;
+  return '<1dk';
 };
 
 export default function FlowerPot({ saksi }) {
@@ -39,42 +47,50 @@ export default function FlowerPot({ saksi }) {
 
   const gorunumEmoji = ASAMA_EMOJI[saksi.asama] ?? (cicek?.emoji ?? '🌸');
 
-  const hastalikVar = !!saksi.hastalik;
   const hazir = saksi.asama === ASAMA.HAZIR;
   const olu = saksi.asama === ASAMA.OLDU;
   const bos = saksi.asama === ASAMA.BOS;
+  const soluyor = saksi.asama === ASAMA.SOLUYOR;
+  const hastalik = !!saksi.hastalik;
 
-  const buyumeYuzde = Math.round(saksi.ilerleme);
+  const kalan = cicek ? kalanMetin(saksi.ilerleme, cicek.buyumeZamani) : null;
+
+  const tikla = () => {
+    if (!bos) ses.bildirim();
+    saksi_sec(saksi.id);
+  };
 
   return (
     <div
-      className={`saksi-kart ${hazir ? 'saksi-hazir' : ''} ${olu ? 'saksi-olu' : ''} ${hastalikVar ? 'saksi-hasta' : ''}`}
-      onClick={() => saksi_sec(saksi.id)}
+      className={[
+        'saksi-kart',
+        hazir ? 'saksi-hazir' : '',
+        olu ? 'saksi-olu' : '',
+        hastalik ? 'saksi-hasta' : '',
+        soluyor ? 'saksi-soluyor' : '',
+        bos ? 'saksi-bos' : '',
+      ].filter(Boolean).join(' ')}
+      onClick={tikla}
     >
       {/* Çiçek görseli */}
       <div className="saksi-cicek">
-        <span className={`saksi-emoji ${hazir ? 'saksi-emoji-hazir' : ''}`}>
+        <span className={`saksi-emoji ${hazir ? 'saksi-emoji-hazir' : soluyor ? 'saksi-emoji-soluyor' : ''}`}>
           {gorunumEmoji}
         </span>
-        {hastalikVar && (
-          <span className="saksi-hastalik-ikon">🦠</span>
-        )}
-        {hazir && (
-          <span className="saksi-hazir-ikon">✨</span>
-        )}
+        {hastalik && <span className="saksi-hastalik-ikon">🦠</span>}
+        {hazir && <span className="saksi-hazir-ikon">✨</span>}
+        {soluyor && <span className="saksi-soluyor-ikon">💦</span>}
       </div>
 
       {/* Çiçek adı */}
       {cicek && (
-        <div className="saksi-cicek-adi">
-          {cicek.name}
-        </div>
+        <div className="saksi-cicek-adi">{cicek.name}</div>
       )}
 
-      {/* Su seviyesi çubuğu */}
+      {/* Su barı */}
       {!bos && !olu && (
         <div className="saksi-su-bar">
-          <span style={{ fontSize: '10px' }}>{suIkonu(saksi.suSeviyesi)}</span>
+          <span style={{ fontSize: '9px' }}>💧</span>
           <div className="saksi-su-bg">
             <div
               className="saksi-su-dolu"
@@ -87,23 +103,27 @@ export default function FlowerPot({ saksi }) {
         </div>
       )}
 
-      {/* Büyüme yüzdesi */}
+      {/* Büyüme barı */}
       {!bos && !olu && (
         <div className="saksi-ilerleme-bar">
           <div
             className="saksi-ilerleme-dolu"
-            style={{ width: `${buyumeYuzde}%` }}
+            style={{ width: `${Math.round(saksi.ilerleme)}%` }}
           />
         </div>
       )}
 
-      {/* Durum yazısı */}
+      {/* Durum / kalan süre */}
       <div className="saksi-durum">
         {bos && <span className="saksi-durum-bos">+ Ek</span>}
         {olu && <span className="saksi-durum-olu">💀 Öldü</span>}
-        {hazir && <span className="saksi-durum-hazir">Hasat Et!</span>}
-        {!bos && !olu && !hazir && (
-          <span className="saksi-durum-normal">%{buyumeYuzde}</span>
+        {hazir && <span className="saksi-durum-hazir">Hasat!</span>}
+        {soluyor && <span className="saksi-durum-susuyor">Su gerek!</span>}
+        {!bos && !olu && !hazir && !soluyor && kalan && (
+          <span className="saksi-durum-normal">⏱ {kalan}</span>
+        )}
+        {!bos && !olu && !hazir && !soluyor && !kalan && (
+          <span className="saksi-durum-normal">%{Math.round(saksi.ilerleme)}</span>
         )}
       </div>
     </div>

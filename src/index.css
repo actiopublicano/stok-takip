@@ -1213,3 +1213,255 @@ body {
   font-size: 11px;
   padding: 8px;
 }
+
+/* ─── TUTORIAL OVERLAY ─────────────────────────────────────────── */
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.tutorial-kart {
+  background: linear-gradient(180deg, #1b5e20, #2e7d32);
+  border-radius: 24px;
+  padding: 28px 24px 20px;
+  width: min(400px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  border: 2px solid rgba(76,175,80,0.4);
+}
+
+.tutorial-ikon {
+  font-size: 52px;
+  line-height: 1;
+}
+
+.tutorial-baslik {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e8f5e9;
+  text-align: center;
+  margin: 0;
+}
+
+.tutorial-icerik {
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  white-space: pre-line;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.tutorial-noktalar {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.tutorial-nokta {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.tutorial-nokta.aktif {
+  background: #69f0ae;
+  transform: scale(1.3);
+}
+
+.tutorial-nokta.gecmis { background: rgba(105,240,174,0.5); }
+
+.tutorial-butonlar {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.tutorial-geri-btn {
+  padding: 12px 18px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tutorial-geri-btn:active { background: rgba(255,255,255,0.25); }
+
+.tutorial-ileri-btn {
+  flex: 1;
+  padding: 12px;
+  background: #4CAF50;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tutorial-ileri-btn:active { background: #388e3c; }
+
+.tutorial-baslat-btn {
+  flex: 1;
+  padding: 12px;
+  background: linear-gradient(135deg, #ffd700, #f57f17);
+  border: none;
+  border-radius: 12px;
+  color: #1a2e1a;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  animation: hasatParlat 1.5s ease-in-out infinite;
+}
+
+.tutorial-atla-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: underline;
+}
+
+/* ─── HIZLI EYLEMLER ───────────────────────────────────────────── */
+.hizli-eylemler {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.hizli-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  min-width: 100px;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.hizli-btn:active { transform: scale(0.96); }
+
+.hizli-sula-btn {
+  background: linear-gradient(135deg, #0288d1, #0277bd);
+}
+
+.hizli-hasat-btn {
+  background: linear-gradient(135deg, #388e3c, #2e7d32);
+  animation: pulseGreen 2s infinite;
+}
+
+.hizli-hasta-btn {
+  background: linear-gradient(135deg, #c62828, #b71c1c);
+  animation: pulseRed 2s infinite;
+}
+
+/* ─── SOLUYOR DURUMU ───────────────────────────────────────────── */
+.saksi-soluyor {
+  border-color: #ff9800;
+  animation: soluyorSal 2s ease-in-out infinite;
+}
+
+@keyframes soluyorSal {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 152, 0, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(255, 152, 0, 0.8); }
+}
+
+.saksi-emoji-soluyor {
+  animation: soluyorSal 2s ease-in-out infinite;
+  filter: hue-rotate(30deg);
+}
+
+.saksi-soluyor-ikon {
+  position: absolute;
+  bottom: -4px;
+  right: -2px;
+  font-size: 12px;
+  animation: parlaklIk 1s ease-in-out infinite;
+}
+
+.saksi-durum-susuyor {
+  color: #e65100;
+  font-weight: 700;
+}
+
+/* ─── MODAL EK STILLER ─────────────────────────────────────────── */
+.modal-satis-tahmini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f1f8e9;
+  border: 1px solid #c5e1a5;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #5d4037;
+}
+
+.modal-satis-fiyat {
+  font-weight: 700;
+  color: #2e7d32;
+  font-size: 15px;
+}
+
+.modal-aktif-gubre {
+  background: linear-gradient(135deg, #fff9c4, #fff8e1);
+  border: 1px solid #ffd54f;
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-size: 12px;
+  color: #f57f17;
+  font-weight: 600;
+}
+
+/* ─── SES TOGGLE ───────────────────────────────────────────────── */
+.ses-toggle-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  transition: background 0.2s;
+}
+
+.ses-toggle-btn:active { background: rgba(255,255,255,0.25); }
+
+/* ─── SERA KAPASİTE ROZET ──────────────────────────────────────── */
+.sera-kapasite {
+  margin-left: auto;
+  background: rgba(76,175,80,0.25);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #a5d6a7;
+  font-weight: 600;
+}

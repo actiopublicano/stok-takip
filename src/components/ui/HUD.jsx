@@ -1,17 +1,25 @@
 // Üst bilgi çubuğu - para, seviye, hava, mevsim
 
+import { useState } from 'react';
 import { useOyun } from '../../context/GameContext.jsx';
 import { HAVA_IKONU, MEVSIM_IKONU } from '../../game/systems/weatherSystem.js';
 import { SEVIYE_XP } from '../../game/core/constants.js';
+import { ses } from '../../game/systems/soundSystem.js';
 
 export default function HUD() {
   const { durum } = useOyun();
   const { oyuncu, hava, mevsim } = durum;
+  const [sesSusturuldu, setSesSusturuldu] = useState(false);
 
   const seviyeXP = SEVIYE_XP[oyuncu.seviye] ?? SEVIYE_XP[SEVIYE_XP.length - 1];
   const xpYuzde = Math.min(100, (oyuncu.xp / seviyeXP) * 100);
   const havaIkon = HAVA_IKONU[hava.mevcut] ?? '☀️';
   const mevsimIkon = MEVSIM_IKONU[mevsim.mevcut] ?? '🌸';
+
+  const handleSesToggle = () => {
+    ses.toggle();
+    setSesSusturuldu(s => !s);
+  };
 
   return (
     <div className="hud">
@@ -25,10 +33,13 @@ export default function HUD() {
         {/* Oyun Adı */}
         <div className="hud-title">🌸 Çiçek Serası</div>
 
-        {/* Hava + Mevsim */}
+        {/* Hava + Mevsim + Ses */}
         <div className="hud-chip">
           <span>{havaIkon}</span>
           <span>{mevsimIkon}</span>
+          <button className="ses-toggle-btn" onClick={handleSesToggle} title="Ses aç/kapat">
+            {sesSusturuldu ? '🔇' : '🔊'}
+          </button>
         </div>
       </div>
 
