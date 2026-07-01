@@ -1,47 +1,53 @@
-import { useState, useEffect } from 'react'
-import Dashboard from './screens/Dashboard'
-import Kategoriler from './screens/Kategoriler'
-import HaftalikKontrol from './screens/HaftalikKontrol'
-import AlisverisListesi from './screens/AlisverisListesi'
-import { demoVeriyiYukle } from './data/store'
+// Ana uygulama - çiçek yetiştirme oyunu
 
-const TABS = [
-  { id: 'dashboard', label: 'Ana Sayfa', icon: '🏠' },
-  { id: 'kategoriler', label: 'Ürünler', icon: '📦' },
-  { id: 'kontrol', label: 'Kontrol', icon: '✅' },
-  { id: 'alisveris', label: 'Alışveriş', icon: '🛒' },
-]
+import { useEffect } from 'react';
+import { OyunSaglayici, useOyun } from './context/GameContext.jsx';
+import HUD from './components/ui/HUD.jsx';
+import NavBar from './components/ui/NavBar.jsx';
+import Bildirimler from './components/ui/Notification.jsx';
+import GreenhouseScreen from './components/screens/GreenhouseScreen.jsx';
+import ShopScreen from './components/screens/ShopScreen.jsx';
+import CollectionScreen from './components/screens/CollectionScreen.jsx';
+import AchievementsScreen from './components/screens/AchievementsScreen.jsx';
+import ProfileScreen from './components/screens/ProfileScreen.jsx';
 
-export default function App() {
-  const [tab, setTab] = useState('dashboard')
+function OyunIcerigi() {
+  const { durum, dispatch } = useOyun();
+  const aktifEkran = durum.ui.aktifEkran;
 
+  // Ölü saksı temizleme eventi
   useEffect(() => {
-    demoVeriyiYukle()
-  }, [])
+    const temizle = (e) => {
+      dispatch({ tip: 'SAKSI_TEMIZLE', saksiId: e.detail.id });
+    };
+    window.addEventListener('temizle-saksi', temizle);
+    return () => window.removeEventListener('temizle-saksi', temizle);
+  }, [dispatch]);
+
+  const ekranlar = {
+    sera: <GreenhouseScreen />,
+    dukkan: <ShopScreen />,
+    koleksiyon: <CollectionScreen />,
+    basarimlar: <AchievementsScreen />,
+    profil: <ProfileScreen />,
+  };
 
   return (
-    <div className="flex flex-col min-h-svh bg-slate-50">
-      <div className="flex-1 overflow-auto pb-20">
-        {tab === 'dashboard' && <Dashboard onTabChange={setTab} />}
-        {tab === 'kategoriler' && <Kategoriler />}
-        {tab === 'kontrol' && <HaftalikKontrol onDone={() => setTab('dashboard')} />}
-        {tab === 'alisveris' && <AlisverisListesi />}
-      </div>
-
-      <nav className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-white border-t border-slate-200 flex">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`flex-1 flex flex-col items-center py-2 text-xs gap-1 transition-colors ${
-              tab === t.id ? 'text-blue-600' : 'text-slate-500'
-            }`}
-          >
-            <span className="text-xl">{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
-      </nav>
+    <div className="oyun-kap">
+      <HUD />
+      <main className="oyun-ana">
+        {ekranlar[aktifEkran] ?? <GreenhouseScreen />}
+      </main>
+      <NavBar />
+      <Bildirimler />
     </div>
-  )
+  );
+}
+
+export default function App() {
+  return (
+    <OyunSaglayici>
+      <OyunIcerigi />
+    </OyunSaglayici>
+  );
 }
