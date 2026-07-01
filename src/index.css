@@ -1829,3 +1829,67 @@ body {
   cursor: pointer;
   width: 100%;
 }
+
+/* ─── HAVA DETAY PANELİ ──────────────────────────────────────────── */
+.sera-hava-banner-tikla {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.sera-hava-banner-tikla:active {
+  background: rgba(255,255,255,0.08);
+}
+
+.sera-hava-detay-toggle {
+  margin-left: auto;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.sera-hava-detay-panel {
+  margin: 0 10px 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 10px 14px;
+  animation: havaDetayAc 0.15s ease;
+}
+
+@keyframes havaDetayAc {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sera-hava-detay-baslik {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sera-hava-detay-satir {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 13px;
+}
+.sera-hava-detay-satir:last-child {
+  border-bottom: none;
+}
+.sera-hava-detay-satir > span:first-child {
+  color: rgba(255,255,255,0.65);
+}
+.sera-hava-detay-satir > span:last-child {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.sera-hava-detay-ipucu {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 4px;
+}
