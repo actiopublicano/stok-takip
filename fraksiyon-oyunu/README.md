@@ -18,6 +18,16 @@ npm run preview   # üretim derlemesini yerelde önizleme
 
 `npm run build` sonrası `dist/` klasörü statik bir PWA'dır; herhangi bir statik dosya sunucusuyla (Netlify, Vercel, GitHub Pages, `npx serve dist`) yayınlanabilir. Servis worker sayesinde ilk yüklemeden sonra **tamamen offline** çalışır.
 
+### Kurulumsuz, tek dosyalık oynanabilir sürüm
+
+Hiçbir şey kurmadan, doğrudan tarayıcıda çift tıklayıp oynamak için tek bir `index.html` dosyası üretilebilir (tüm JS/CSS dosyanın içine gömülür, sunucu gerektirmez):
+
+```bash
+npm run build:standalone
+```
+
+Bu, `dist-standalone/index.html` dosyasını üretir. Bu dosyayı bilgisayara/telefona indirip **doğrudan çift tıklayarak** (veya tarayıcıda "Dosya Aç" ile) tarayıcıda açman yeterli — kurulum, sunucu veya internet bağlantısı gerekmez. (Servis worker ve otomatik PWA kurulumu bu sürümde devre dışıdır çünkü `file://` üzerinden çalışmaz; tam PWA deneyimi için yukarıdaki `npm run build` + statik sunucu yöntemini kullanın.)
+
 ## Mimari
 
 ```
