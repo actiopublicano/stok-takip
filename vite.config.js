@@ -4,23 +4,24 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/stok-takip/',
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Stok Takip',
-        short_name: 'Stok',
-        description: 'Ev malzeme stok takip uygulaması',
-        theme_color: '#2563eb',
-        background_color: '#ffffff',
+        name: 'Çiçek Serası',
+        short_name: 'Çiçek Serası',
+        description: 'Kendi çiçek seranı kur, yetiştir ve sat!',
+        theme_color: '#1b5e20',
+        background_color: '#1a2e1a',
         display: 'standalone',
         orientation: 'portrait',
         lang: 'tr',
         icons: [
-          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' }
+          { src: '/stok-takip/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/stok-takip/icon-512.png', sizes: '512x512', type: 'image/png' }
         ]
       }
     })
